@@ -2,30 +2,38 @@
 
 UED100 Assessment 2 — educational airline prototype inspired by the Assessment 1 Qantas analysis.
 
-## Run in Visual Studio Code
-1. Install Node.js 24 LTS from https://nodejs.org/ and open this folder in VS Code.
-2. Open Terminal > New Terminal. Run each command separately:
+## Run locally
+Use Node.js 24 LTS and open the project folder in Visual Studio Code. In Terminal > New Terminal:
 
 ```sh
-npm install -g pnpm
-pnpm install --frozen-lockfile
-pnpm run dev
+npm install
+npm run dev
 ```
 
-3. Open the local URL printed by Vite (usually http://localhost:5173/).
-4. In a separate terminal, run `pnpm run build` and `pnpm run format --check` to verify the build and formatting.
+Open the local address printed by Vite. Stop with Ctrl+C. Run `npm run build` to generate production files, then optionally `npm run preview` to preview them. If the npm lockfile is present, `npm ci` can install the locked dependencies instead of `npm install`.
 
-## Demo tests
-- Search Sydney to Melbourne with future travel dates; select one-way to disable return date.
-- Swap airports and change passenger count.
-- Retrieve booking SKY123 / HART; try incorrect details.
-- Check flight status using SY218 and a date.
-- Submit an empty contact form, then use a fictional name, example@example.com and a message of at least 15 characters.
-- Resize browser to mobile width and test navigation.
+## Manual regression tests (expected results)
 
-All results are simulated; no real bookings, emails or flight lookups occur. Sign-in and header search are placeholders. The original application logic is retained, including its limitations (e.g. identical airports are not rejected). Google Fonts require internet; fallback fonts are available.
+| Test | Expected result |
+| --- | --- |
+| Return search with different airports and valid future dates | Simulated availability |
+| One-way search | Return date disabled; simulated availability |
+| Same origin and destination, with valid dates | Route error; no availability |
+| Change any search input or swap airports after a search | Previous result and route error cleared |
+| SKY123 / HART | Sample booking displayed |
+| Incorrect booking reference | Booking error |
+| SY218 and travel date | Simulated status |
+| Empty contact form | Field validation errors |
+| Fictional name, valid email, message of at least 15 characters | Demo confirmation; no email sent |
+| Narrow browser window | Mobile navigation opens and closes |
 
-## Packaging notes
-The supplied Figma Make source, stylesheet, image, dependency files and TypeScript configuration are retained. The Vite configuration and HTML shell were simplified to remove the missing Figma-specific site.json dependency. No dependencies or build output are bundled. Local build and browser tests remain to be performed.
+Run these tests after installing this revision; expected results are not a record of completed tests.
 
-Figma Make: https://www.figma.com/make/gPs9AD1R2jckzwVbRABtXp/Skybound-Flight-Booking-Prototype?code-node-id=0-6
+## Limitations
+All flight availability, booking and status data are simulated. No backend, real bookings, email delivery or authentication is implemented. Header search, sign-in and footer policy links are placeholders. Contact validation is client-side only. Google Fonts require internet; fallback fonts are available. Full accessibility compliance has not been verified.
+
+## Design and repository
+- Figma Make: https://www.figma.com/make/gPs9AD1R2jckzwVbRABtXp/Skybound-Flight-Booking-Prototype?code-node-id=0-6
+- GitHub: https://github.com/beaconcsolutions95-ux/Skybound-Flight-Booking
+
+Keep package-lock.json from the local npm installation in version control. Do not commit node_modules, dist, or credentials.

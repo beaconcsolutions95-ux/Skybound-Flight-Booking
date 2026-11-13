@@ -1,5 +1,6 @@
 import { FormEvent, useMemo, useState } from "react";
 
+// Restrict icon names to the supported SVG symbols.
 type IconName =
   | "arrow"
   | "calendar"
@@ -14,6 +15,7 @@ type IconName =
   | "user"
   | "users";
 
+// Reusable decorative SVG icons; aria-hidden avoids redundant screen-reader output.
 function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, React.ReactNode> = {
     arrow: (
@@ -81,6 +83,7 @@ function Icon({ name, className = "size-5" }: { name: IconName; className?: stri
   );
 }
 
+// Fixed airport options for the demonstration, not a live airline database.
 const airports = [
   "Sydney (SYD)",
   "Melbourne (MEL)",
@@ -92,6 +95,7 @@ const airports = [
   "Los Angeles (LAX)",
 ];
 
+// Shared visual label styling for form fields.
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
@@ -101,8 +105,11 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  // Calculate the minimum departure date using an ISO date string.
   const today = new Date().toISOString().split("T")[0];
+  // Track whether the small-screen navigation menu is open.
   const [mobileNav, setMobileNav] = useState(false);
+  // Controlled flight-search inputs and result visibility.
   const [tripType, setTripType] = useState<"return" | "oneway">("return");
   const [from, setFrom] = useState("Sydney (SYD)");
   const [to, setTo] = useState("Melbourne (MEL)");
@@ -110,16 +117,21 @@ export default function App() {
   const [returnDate, setReturnDate] = useState("");
   const [passengers, setPassengers] = useState("1");
   const [flightSearch, setFlightSearch] = useState(false);
+  const [flightError, setFlightError] = useState("");
+  // Booking lookup inputs and success/error feedback.
   const [bookingRef, setBookingRef] = useState("");
   const [surname, setSurname] = useState("");
   const [bookingResult, setBookingResult] = useState<"success" | "error" | null>(null);
+  // Flight-status inputs and simulated result state.
   const [flightNumber, setFlightNumber] = useState("");
   const [travelDate, setTravelDate] = useState("");
   const [statusResult, setStatusResult] = useState<"success" | "error" | null>(null);
+  // Contact form values, field-specific errors and confirmation state.
   const [contact, setContact] = useState({ name: "", email: "", message: "" });
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
 
+  // Reformat the departure date only when its value changes.
   const formattedDepart = useMemo(
     () =>
       depart
@@ -131,16 +143,34 @@ export default function App() {
     [depart],
   );
 
+  // Clear stale results and errors whenever a search input changes.
+  function resetFlightSearch() {
+    setFlightSearch(false);
+    setFlightError("");
+  }
+
+  // Exchange the selected airports using their current state values.
   function swapRoute() {
     setFrom(to);
     setTo(from);
+    resetFlightSearch();
   }
 
+  // Prevent page reload and show a simulated result when required inputs exist.
+  // A return date is required only for return trips.
   function searchFlights(e: FormEvent) {
     e.preventDefault();
+    resetFlightSearch();
+    // Reject identical airports before displaying simulated availability.
+    if (from === to) {
+      setFlightError("Please select different departure and arrival airports.");
+      return;
+    }
     if (from && to && depart && (tripType === "oneway" || returnDate)) setFlightSearch(true);
   }
 
+  // Normalise case and whitespace before matching the single demonstration booking.
+  // No real booking database is queried.
   function retrieveBooking(e: FormEvent) {
     e.preventDefault();
     setBookingResult(
@@ -150,11 +180,14 @@ export default function App() {
     );
   }
 
+  // Check that a flight number and date exist; the displayed status is mock data.
   function checkStatus(e: FormEvent) {
     e.preventDefault();
     setStatusResult(flightNumber.trim() && travelDate ? "success" : "error");
   }
 
+  // Validate name length, email format and message length on the client.
+  // Store errors for inline feedback; success does not send a real email.
   function submitContact(e: FormEvent) {
     e.preventDefault();
     const errors: Record<string, string> = {};
@@ -169,6 +202,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f4f5f6] text-[#172234]">
+      {/* Desktop navigation and a collapsible menu for smaller screens. */}
       <header className="absolute inset-x-0 top-0 z-30 border-b border-white/20 text-white">
         <div className="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-5 lg:px-10">
           <a href="#" className="flex items-center gap-3" aria-label="Skybound home">
@@ -208,6 +242,7 @@ export default function App() {
             <Icon name="menu" />
           </button>
         </div>
+        {/* Render mobile links only while the menu is open. */}
         {mobileNav && (
           <nav className="mx-4 rounded-xl bg-white p-4 text-sm font-semibold text-slate-800 shadow-xl lg:hidden">
             {["Book", "Manage booking", "Flight status", "Help"].map((item, index) => (
@@ -224,6 +259,7 @@ export default function App() {
         )}
       </header>
 
+      {/* Main travel tasks are arranged as sections of a single page. */}
       <main>
         <section className="relative min-h-[660px] overflow-hidden bg-[#172234] pb-36 pt-36 text-white lg:min-h-[710px] lg:pb-48 lg:pt-40">
           <img
@@ -275,7 +311,7 @@ export default function App() {
                   <input
                     type="radio"
                     checked={tripType === "return"}
-                    onChange={() => setTripType("return")}
+                    onChange={() => { setTripType("return"); resetFlightSearch(); }}
                     className="accent-[#d91f2c]"
                   />{" "}
                   Return
@@ -284,7 +320,7 @@ export default function App() {
                   <input
                     type="radio"
                     checked={tripType === "oneway"}
-                    onChange={() => setTripType("oneway")}
+                    onChange={() => { setTripType("oneway"); resetFlightSearch(); }}
                     className="accent-[#d91f2c]"
                   />{" "}
                   One way
@@ -295,7 +331,7 @@ export default function App() {
                   <FieldLabel>From</FieldLabel>
                   <span className="field-control">
                     <Icon name="plane" className="size-5 text-slate-400" />
-                    <select value={from} onChange={(e) => setFrom(e.target.value)}>
+                    <select value={from} onChange={(e) => { setFrom(e.target.value); resetFlightSearch(); }}>
                       {airports.map((airport) => (
                         <option key={airport}>{airport}</option>
                       ))}
@@ -314,7 +350,7 @@ export default function App() {
                   <FieldLabel>To</FieldLabel>
                   <span className="field-control">
                     <Icon name="plane" className="size-5 rotate-90 text-slate-400" />
-                    <select value={to} onChange={(e) => setTo(e.target.value)}>
+                    <select value={to} onChange={(e) => { setTo(e.target.value); resetFlightSearch(); }}>
                       {airports.map((airport) => (
                         <option key={airport}>{airport}</option>
                       ))}
@@ -331,7 +367,7 @@ export default function App() {
                       value={depart}
                       onChange={(e) => {
                         setDepart(e.target.value);
-                        setFlightSearch(false);
+                        resetFlightSearch();
                       }}
                       required
                     />
@@ -345,7 +381,7 @@ export default function App() {
                       type="date"
                       min={depart || today}
                       value={returnDate}
-                      onChange={(e) => setReturnDate(e.target.value)}
+                      onChange={(e) => { setReturnDate(e.target.value); resetFlightSearch(); }}
                       required={tripType === "return"}
                       disabled={tripType === "oneway"}
                     />
@@ -355,7 +391,7 @@ export default function App() {
                   <FieldLabel>Passengers</FieldLabel>
                   <span className="field-control">
                     <Icon name="users" className="size-5 text-slate-400" />
-                    <select value={passengers} onChange={(e) => setPassengers(e.target.value)}>
+                    <select value={passengers} onChange={(e) => { setPassengers(e.target.value); resetFlightSearch(); }}>
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                         <option key={n} value={n}>
                           {n} {n === 1 ? "adult" : "people"}
@@ -368,6 +404,12 @@ export default function App() {
                   Search flights
                 </button>
               </div>
+              {/* Announce route validation feedback to assistive technologies. */}
+              {flightError && (
+                <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700">
+                  {flightError}
+                </p>
+              )}
               {flightSearch && (
                 <div className="mt-6 flex flex-col justify-between gap-4 rounded-xl bg-[#f4f7fa] p-4 sm:flex-row sm:items-center">
                   <div className="flex items-center gap-4">
@@ -385,7 +427,7 @@ export default function App() {
                     </div>
                   </div>
                   <p className="text-sm font-semibold text-emerald-700">
-                    12 available flights found
+                    12 available flights found (demo)
                   </p>
                 </div>
               )}
@@ -597,8 +639,8 @@ export default function App() {
                     </span>
                     <h3 className="card-title mt-6">Message received</h3>
                     <p className="mt-3 max-w-sm text-sm leading-6 text-slate-500">
-                      Thanks, {contact.name}. We’ve sent a confirmation to {contact.email} and will
-                      be in touch soon.
+                      Thanks, {contact.name}. Your enquiry passed validation in this prototype.
+                      No actual email has been sent.
                     </p>
                     <button
                       onClick={() => {

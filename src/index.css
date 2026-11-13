@@ -1,11 +1,14 @@
+/* Load the display and body fonts, then Tailwind CSS. */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap");
 @import "tailwindcss";
 
+/* Shared font tokens for Tailwind utility classes. */
 @theme {
   --font-sans: "DM Sans", sans-serif;
   --font-display: "Manrope", sans-serif;
 }
 
+/* Global defaults for scrolling, typography and interactive controls. */
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -28,7 +31,9 @@
   }
 }
 
+/* Reusable component styles shared across the booking interface. */
 @layer components {
+  /* Desktop navigation with an animated underline on hover. */
   .nav-link {
     position: relative;
     padding-block: 1.75rem;
@@ -58,6 +63,7 @@
     font-family: "Manrope", sans-serif;
   }
 
+  /* Consistent field layout and input container styling. */
   .form-field {
     display: block;
     min-width: 0;
@@ -78,6 +84,7 @@
       box-shadow 160ms ease;
   }
 
+  /* Highlight the field container when an inner control receives focus. */
   .field-control:focus-within {
     border-color: #d91f2c;
     box-shadow: 0 0 0 3px rgb(217 31 44 / 0.09);
@@ -102,6 +109,7 @@
     font-weight: 500;
   }
 
+  /* Visual error feedback for invalid contact form inputs. */
   .field-error {
     border-color: #dc2626;
     background: #fffafa;
@@ -115,6 +123,7 @@
     font-weight: 600;
   }
 
+  /* Heading hierarchy and responsive font sizes. */
   .eyebrow {
     margin-bottom: 0.75rem;
     color: #d91f2c;
@@ -139,6 +148,7 @@
     letter-spacing: -0.025em;
   }
 
+  /* Shared service card appearance with fluid padding. */
   .service-card {
     border: 1px solid #e2e6ea;
     border-radius: 1rem;
@@ -177,6 +187,7 @@
     color: white;
   }
 
+  /* Result panels and status indicators for simulated responses. */
   .result-card {
     margin-top: 1.25rem;
     border: 1px solid #dce4e8;
@@ -208,6 +219,7 @@
   }
 }
 
+/* Restore native select appearance on smaller screens. */
 @media (max-width: 1023px) {
   .field-control select {
     appearance: auto;
